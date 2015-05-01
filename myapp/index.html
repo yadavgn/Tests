@@ -1,0 +1,274 @@
+<!doctype html>
+<html>
+<head>
+    <title>My Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <script src="https://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+<body >
+	<script>
+	//$(document).ready( init() );
+UserProfile = function(name, mobile, address1, address2, address3,email)
+{
+	this.name = name;
+	this.mobile = mobile;
+	this.address1 = address1;
+	this.address2 = address2;
+	this.address3 = address3;
+	this.email = email;	
+
+};
+
+UserProfile.prototype.isRegistered = function() {
+	return !(localStorage.userprofile === undefined);
+};
+
+/***********************************************************
+* thsi function loads App User Profile from local db.
+************************************************************/
+UserProfile.prototype.loadUserProfile = function() {
+	
+	var profile = JSON.parse(localStorage.userprofile);
+	if(!this.isRegistered())	return this;
+
+	this.name = profile.name;
+	this.mobile = profile.mobile;
+	this.address1 = profile.address1;
+	this.address2 = profile.address2;
+	this.address3 = profile.address3;
+	this.email = profile.email;
+	return this;
+};
+
+Orders = function() {
+	this.Order = new Array();
+}
+
+MyApp = function() {
+	this.userprofile = new UserProfile();
+	this.orders = new Orders();
+};
+
+App = new MyApp();
+
+/////////////////////////////////////////////////////////////////////////////////
+// This function will update Register Page with the stored profile information.
+////////////////////////////////////////////////////////////////////////////////
+MyApp.prototype.DisplayProfileDetails = function(parent) {
+	if(parent === undefined) parent = '';
+	$(parent+' #nameinput').val(this.userprofile.name);
+	$(parent+' #mobileinput').val(this.userprofile.mobile);
+	$(parent+' #addressinput-1').val(this.userprofile.address1);
+	$(parent+' #addressinput-2').val(this.userprofile.address2);
+	$(parent+' #addressinput-3').val(this.userprofile.address3);
+	$(parent+' #emailinput').val(this.userprofile.email);
+
+	return this;
+}
+
+MyApp.prototype.UpdateUserProfile = function(parent) {
+	this.userprofile.name 		= $(parent+' #nameinput').val();
+	this.userprofile.mobile 	= $(parent+' #mobileinput').val();
+	this.userprofile.address1 	= $(parent+' #addressinput-1').val();
+	this.userprofile.address2 	= $(parent+' #addressinput-2').val();
+	this.userprofile.address3 	= $(parent+' #addressinput-3').val();
+	this.userprofile.email 		= $(parent+' #emailinput').val();
+
+	return this;
+}
+
+$( document ).on( "pagecontainerbeforechange", function ( event, data ) {
+   	console.log('test: This is pagecontainerbeforechange event.');
+});
+
+$(document).ready(function(){
+	$('#submitprofile').click(function(){
+		App.UpdateUserProfile("#registration"); // take data from ui to object.
+		//App.userprofile.isValid();  // perform validation of the user profile object.
+		localStorage.userprofile = JSON.stringify(App.userprofile); // save user profile in local storage.
+		
+		$('#wellcomescrn h1').text('Wellcome '+ App.userprofile.name)
+		$.mobile.pageContainer.pagecontainer("change", "#start", {
+					transition: "pop"
+		});
+	});
+});
+
+$(document).ready(function() {
+	if(App.userprofile.isRegistered() === false ){
+		setTimeout(function (e) {
+				$.mobile.pageContainer.pagecontainer("change", "#registration", {
+					transition: "pop"
+				});
+			},100);
+	}else {
+		App.userprofile.loadUserProfile();
+		$('#wellcomescrn h1').text('Hi '+ App.userprofile.name);
+		//App.DisplayProfileDetails('#profile');
+	}
+
+});
+
+
+$(document).ready(function(){
+	$('#gotoNewOrder').click(function(){
+		
+
+	});
+	
+	$('#openprofile').click(function(){
+		//App.UpdateUserProfile("#profile");
+		App.DisplayProfileDetails("#profile");
+		$.mobile.pageContainer.pagecontainer("change", "#profile", {
+			transition: "pop"
+		});
+	});
+	
+	$('#updateprofile').click(function(){
+
+		App.UpdateUserProfile("#profile"); // take data from ui to object.
+		//App.userprofile.isValid();  // perform validation of the user profile object.
+		localStorage.userprofile = JSON.stringify(App.userprofile); // save user profile in local storage.
+
+		$('#wellcomescrn h1').text('Hi '+ App.userprofile.name);
+		$("#popupBasic").popup( "open",{
+				transition: "fade"
+			} ).text("Data Saved successfully");
+		
+		setTimeout(function(e){
+			$("#popupBasic").popup("close",{
+				transition: "fade"
+			});
+		}, 1000);
+
+	});
+
+	$('#unregisterprofile').click(function(){
+		App.UpdateUserProfile("#profile"); // take data from ui to object.
+		//App.userprofile.isValid();  // perform validation of the user profile object.
+		localStorage.removeItem("userprofile");
+		setTimeout(function (e) {
+			$.mobile.pageContainer.pagecontainer("change", "#registration", {
+				transition: "pop"
+			});
+		},100);
+	});
+});
+
+</script>
+		
+<!-- Start of Wellcome page  -->
+<div data-role="page" id="start" >
+	<div data-role="panel" id="mypanel" data-display="overlay">
+
+	<a href='' data-role='button' data-icon="star" id='openprofile'>Profile</a>
+    <a href='' data-role='button' data-icon="star" id='feedback'>Feed Back</a>
+    <a href='' data-role='button' data-icon="star" id='about'>About</a>
+	<a href='' data-role='button' data-icon="star" id='close'>Close</a>
+	</div><!-- /panel -->
+
+	<div data-role="header" id="wellcomescrn">
+		<a href="#mypanel" class="ui-btn ui-shadow ui-corner-all ui-icon-gear ui-btn-icon-notext">Options</a>
+		<h1>Wellcome</h1>
+		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#newOrder" data-icon="star" id='gotoNewOrder'>New Order</a></li>
+				<li><a href="#" data-icon="info">Order Status</a></li>
+				<li><a href="#" data-icon="clock">History</a></li>
+			</ul>
+		</div><!-- /navbar -->
+	</div>
+
+	<div data-role='content'>
+		<a align='center'><img align='center' src="start-button.jpg"/> </a>
+		<p align='center' > this application is an initial effort to provide on time service with intended quality. with this app you can easly place and schedule an order as per your conveniance. </a>  
+	</div>
+</div><!-- /page -->
+
+<!-- new order page -->
+<div data-role="page" id="newOrder">
+	<div data-role="header">
+		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
+		<h1>New Order</h1>
+		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
+	</div>
+	<div data-role='content'>	
+		<label for="pickuptime">Scheduled Pickup</label>
+		<input type="datetime-local" data-clear-btn="false" name="datetime-3" id="pickuptime" value=''>
+		<label  inline=true for="datetime-4">Datetime-local: data-clear-btn="true"</label>
+		<input inline=true type="datetime-local" data-clear-btn="true" name="datetime-4" id="datetime-4" value="">
+
+		<label for="tel-2">Tel: data-clear-btn="true"</label>
+		 <input name="tel-2" id="tel-2" type="tel" value="" data-clear-btn="true">
+
+		 <a href="#" data-icon="lock">Place Order</a>
+     </div>
+</div>
+
+<!-- Start of registration page -->
+<div data-role="page" id="registration">
+
+	<div data-role="header">
+		<h1>Register</h1>
+		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
+	</div>
+	<div data-role='content'>
+		<label for="textinput-1">Name*</label>
+		<input type="text" name="textinput-1" id="nameinput" placeholder="Text input" value="">
+		<input type="text" name="textinput-1" id="lastnameinput" placeholder="Last name" value="">
+		<label for="textinput-5">Mobile*</label>
+		<input type="text" name="textinput-5" id="mobileinput" placeholder="Text input" value="">
+
+		<label for="textinput-2">Address Line 1*</label>
+		<input type="text" name="textinput-2" id="addressinput-1" placeholder="Text input" value="">
+		<label for="textinput-3">Address Line 2</label>
+		<input type="text" name="textinput-3" id="addressinput-2" placeholder="Text input" value="">
+		<label for="textinput-4">Address Line 3</label>
+		<input type="text" name="textinput-4" id="addressinput-3" placeholder="Text input" value="">
+
+		<label for="emailinput">Email </label>
+		<input type="text" name="emailinput" id="emailinput" placeholder="Text input" value="">
+
+		<a href="" data-role="button" id="submitprofile" class="ui-shadow ui-btn ui-corner-all ui-mini"> Submit </a>
+	</div>
+</div><!-- /page -->
+
+<div data-role="page" id="profile">
+	<div data-role="header">
+		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
+		<h1>Profile</h1>
+		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
+	</div>
+	<div data-role='content'>
+		<label for="textinput-1">Name*</label>
+		<input type="text" name="textinput-1" id="nameinput" placeholder="Text input" value="">
+		<input type="text" name="textinput-1" id="lastnameinput" placeholder="Last name" value="">
+		<label for="textinput-5">Mobile*</label>
+		<input type="text" name="textinput-5" id="mobileinput" placeholder="Text input" value="">
+
+		<label for="textinput-2">Address Line 1*</label>
+		<input type="text" name="textinput-2" id="addressinput-1" placeholder="Text input" value="">
+		<label for="textinput-3">Address Line 2</label>
+		<input type="text" name="textinput-3" id="addressinput-2" placeholder="Text input" value="">
+		<label for="textinput-4">Address Line 3</label>
+		<input type="text" name="textinput-4" id="addressinput-3" placeholder="Text input" value="">
+
+		<label for="emailinput">Email </label>
+		<input type="text" name="emailinput" id="emailinput" placeholder="Text input" value="">
+
+		<a href="" data-role="button" id="updateprofile" class="ui-shadow ui-btn ui-corner-all ui-mini"> Update Details </a>
+		<a href="" data-role="button" id="unregisterprofile" class="ui-shadow ui-btn ui-corner-all ui-mini"> Un-Register </a>
+
+		<!-- <a href="#popupBasic" data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="pop">Basic Popup</a> -->
+		<div data-role="popup" id="popupBasic" class="ui-content" data-position-to="window" >
+		<p>Congratulations! your profile is updated successfully.</p>
+		</div>
+
+	</div>
+</div><!-- /page -->
+
+</body>
+</html>

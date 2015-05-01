@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+    <title>My Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <script src="https://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+<body >
+	<script>
+	/*
+Person = {
+	CurrentPuzzleIndex	: -1,
+	Bank: {}
+};
+Bank = {
+	name : '',
+}
+
+var Person = function (firstName) {
+  this.firstName = firstName;
+  console.log('Person instantiated');
+};
+
+Person.prototype.sayHello = function() {
+  console.log("Hello, I'm " + this.firstName);
+};
+
+var person1 = new Person("Alice");
+var person2 = new Person("Bob");
+
+// call the Person sayHello method.
+person1.sayHello(); // logs "Hello, I'm Alice"
+person2.sayHello(); // logs "Hello, I'm Bob"
+*/
+$(document).ready( function() {
+	console.log('started');
+$('#savebtn').click(function(){
+	localStorage.mydata = $('#saveval').val();
+});
+
+$('#readbtn').click(function(){
+	$('#readval').val(localStorage.mydata);
+});
+});
+</script>
+<div data-role="page" id="start">
+
+	<div data-role="header">
+		<h1>Wellcome</h1>
+	</div><!-- /header -->
+
+	<label for="textinput-2">enter value to save:</label>
+	<input type="text" name="textinput-2" id="saveval" class="serverurl" placeholder="Text input" value="">
+
+	<a href="" data-transition="slide" id='savebtn' data-role="button"> Save</a>
+	<a href="" data-transition="slide" id='readbtn' data-role="button"> Read</a>
+	<label for="textinput-2">read vale:</label>
+	<input type="text" name="textinput-2" id="readval" class="serverurl" placeholder="Text input" value="">
+	<div data-role="footer">
+		<h4>Page Footer</h4>
+	</div><!-- /footer -->
+</div><!-- /page -->
+
+</body>
+</html>
