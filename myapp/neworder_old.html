@@ -1,0 +1,107 @@
+<html>
+<head>
+    <title>About Us</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <script src="https://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="app.js"></script>
+</head>
+<body >
+<script>
+
+$(document).ready(function(){
+    $('#checkbox-fillfromprofile').click(function() {
+        var isChecked = $( "#checkbox-fillfromprofile" ).prop( "checked");
+		console.log('Current state of Check box -->.' + isChecked);
+       	
+		if(isChecked === undefined || isChecked === false)
+		{	
+			//console.log("checkbox status is false of undefined.");
+			return this; //do nothing.
+		}
+    });
+
+    
+      $('#placeorderbtn').click(function() {
+     	localStorage.orders = JSON.stringify(App.orders); // save user profile in local storage.
+		
+     	App.onplaceorder();
+     });
+
+     $('#confirmorder').click(function() {
+     	console.log('Confirming order.');
+     });
+
+     $('#reviseorder').click(function(){
+     	console.log('go back to the repvious order status');
+     });
+
+     $("#orderconfirmation").hide();
+     
+
+});
+
+
+MyApp.prototype.onplaceorder= function(){
+   	console.log(' clicked on place order');
+
+	var pickupdatetime = new Date($('#pickuptime').val());
+	if(pickupdatetime == 'Invalid Date') return ;
+	var droptime = new Date( $('#droptime').val() );
+	App.orders = new Order(App.userprofile.name, App.userprofile.mobile, pickuptime, droptime);
+	var orderDate =   pickupdatetime.getDate();
+	var orderTime = pickupdatetime.getHours();
+	
+	var today = new Date(); // today;
+
+	console.log('today ->'+ today.toUTCString());	
+	console.log('entered ->'+ pickupdatetime.toUTCString());
+
+
+	$('#input').fadeOut(300, function(){
+		var msg = 'Hi ' + App.userprofile.name +', you are requesting for pickup Date: '+ pickupdatetime.toDateString()+' Time: '+ pickupdatetime.toLocaleTimeString()+'. <p> please confirm if you are ok with this order.</p>';
+		$("#orderconfirmation p").html(msg);
+		$("#orderconfirmation").fadeIn(500);
+	});
+	
+	return this;
+};
+
+</script>
+
+
+<!-- new order page -->
+<div data-role="page" data-history="false" id="newOrder">
+	<div data-role="header">
+		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
+		<h1>Place New Order</h1>
+		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Exit</a>
+	</div>
+	<div data-role="navbar">
+		<ul>
+			<li><a href="#newOrder" class="ui-state-persist ui-btn-active" data-icon="star" id='gotoNewOrder'>New Order</a></li>
+			<li><a href="#" data-icon="info">Order Status</a></li>
+			<li><a href="#" data-icon="clock">History</a></li>
+		</ul>
+	</div>
+	<div data-role='content'>
+		<div id='input'>
+			<label for="pickuptime">Scheduled Pickup</label>
+			<input type="datetime-local" data-clear-btn="false" name="datetime-3" id="pickuptime" value=''>
+
+			<label for="droptime">Scheduled Drop</label>
+			<input type="datetime-local" data-clear-btn="false" name="datetime-3" id="droptime" value=''>
+			<a href="#" data-role='button' id='placeorderbtn' data-icon="lock">Place Order</a>
+		</div>
+
+		<div id="orderconfirmation" class="ui-content" >
+				<p > Please check below details and confirm the order. </p>
+			<a  id='confirmorder' data-role='button' class='ui-btn' > Confirm </a>
+			<a id='reviseorder' data-role='button' class='ui-btn-inline' > Cancel </a>
+		</div>
+     </div>
+</div>
+
+
+

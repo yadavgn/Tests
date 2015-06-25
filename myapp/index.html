@@ -42,16 +42,31 @@ UserProfile.prototype.loadUserProfile = function() {
 	return this;
 };
 
+Order = function(name, mobile,pickupdate, pickuptime,dropdate, droptime) {
+	this.pickupdate = pickupdate;
+	this.scheduledpickup = pickuptime;
+	this.scheduleddrop = droptime;
+	this.status = 'new';
+	this.name = name;
+	this.mobile = mobile;
+};
+
+
 Orders = function() {
 	this.Order = new Array();
 }
 
 MyApp = function() {
 	this.userprofile = new UserProfile();
-	this.orders = new Orders();
+	this.orders = new Array();
+	this.currorder = null;
 };
 
 App = new MyApp();
+
+MyApp.prototype.GetCurrentOrder = function(){
+	this.currorder = new Order();
+};
 
 /////////////////////////////////////////////////////////////////////////////////
 // This function will update Register Page with the stored profile information.
@@ -81,6 +96,15 @@ MyApp.prototype.UpdateUserProfile = function(parent) {
 
 $( document ).on( "pagecontainerbeforechange", function ( event, data ) {
    	console.log('test: This is pagecontainerbeforechange event.');
+	/* all properties shouldn't return "undefined" */
+    var toPage = data.toPage,
+        prevPage = data.prevPage ? data.prevPage : "",
+        options = data.options,
+        /* to determine which page (filename) the user is navigating to */
+        absUrl = data.absUrl ? $.mobile.path.parseUrl(data.absUrl).filename : "",
+        /* assuming the user isn't an admin */
+        admin = false;
+        
 });
 
 $(document).ready(function(){
@@ -97,26 +121,20 @@ $(document).ready(function(){
 });
 
 $(document).ready(function() {
-	if(App.userprofile.isRegistered() === false ){
+	if(App.userprofile.isRegistered() === true ){
+		console.log('user is registered');
 		setTimeout(function (e) {
-				$.mobile.pageContainer.pagecontainer("change", "#registration", {
+				$('#wellcomescrn h1').text('Hi '+ App.userprofile.name);
+				$.mobile.pageContainer.pagecontainer("change", "#start", {
 					transition: "pop"
 				});
 			},100);
-	}else {
-		App.userprofile.loadUserProfile();
-		$('#wellcomescrn h1').text('Hi '+ App.userprofile.name);
-		//App.DisplayProfileDetails('#profile');
 	}
-
+	App.userprofile.loadUserProfile();
 });
 
 
 $(document).ready(function(){
-	$('#gotoNewOrder').click(function(){
-		
-
-	});
 	
 	$('#openprofile').click(function(){
 		//App.UpdateUserProfile("#profile");
@@ -155,59 +173,81 @@ $(document).ready(function(){
 			});
 		},100);
 	});
-});
+
+
+	$('#gotoNewOrder').click(function(){
+		// populate user information in new order page.
+		
+
+		$.mobile.pageContainer.pagecontainer("change", "#newOrder", {
+			transition: "pop"
+		});
+		//$('#namelabel').text(App.userprofile.name);
+	});
+
+
+	// THis is on click of the place order button.
+	$('#placeorderbtn').click(function(){
+		var d = $('#pickupdate').val();
+		var t = $('#pickuptime').val();
+		var date = new Date(d+' '+ t);
+		var now = new Date();
+
+		if(now > date)  $('#profiledatap').text(' Alert: Please select a future date');
+		//var time = new Time(t);
+		if( App.currorder === null )
+			App.currorder = new Order(App.userprofile.name, App.userprofile.mobile, d, t );
+		else if( App.currorder.status == 'new' )
+			App.currorder = new Order(App.userprofile.name, App.userprofile.mobile, d, t );
+
+		var newOrder = App.currorder ;
+		App.orders.push(newOrder);
+
+
+		//$('#orderdetails').text('Hi, <h3>' + App.userprofile.name +'. </h3> We have received your order to be pickedup on '
+		//+newOrder.pickupdate+' @' +newOrder.scheduledpickup + '. from address:' + App.userprofile.address1 +' '+
+		//App.userprofile.address2 +' '+ App.userprofile.address3+'. your mobile number is:' + App.userprofile.mobile);
+		$('#orderdetailsname').text(App.userprofile.name);
+		$('#orderdetailsdate').text(newOrder.pickupdate );
+		$('#orderdetailstime').text(newOrder.scheduledpickup);
+		$('#orderdetailsaddress').text(App.userprofile.address1 + ' '
+			 + App.userprofile.address2 + ' ' + App.userprofile.address3);
+	    $('#orderdetailsmobile').text(App.userprofile.mobile);
+
+		$.mobile.pageContainer.pagecontainer("change", "#confirmOrder", {
+			transition: "pop"
+		});
+
+	});
+
+	$('#confirmationFail').click(function() {
+		$.mobile.pageContainer.pagecontainer("change", "#newOrder", {
+				transition: "pop"
+		});
+	});
+
+	$('#confirmationPass').click(function() {
+		$.mobile.pageContainer.pagecontainer("change", "#start", {
+				transition: "pop"
+		});
+
+		localStorage.orders = JSON.stringify(App.orders); 
+	});
+
+
+	$('#gotoOrderStatus').click(function() {
+		$.mobile.pageContainer.pagecontainer("change", "#OrderStatus", {
+				transition: "pop"
+		});
+		if(App.currorder !== null )
+		{
+			$('#orderpickupdate').val(App.currorder.pickupdate);
+			$('#orderpickuptime').val(App.currorder.scheduledpickup);
+		}
+	})
+}); 
 
 </script>
-		
-<!-- Start of Wellcome page  -->
-<div data-role="page" id="start" >
-	<div data-role="panel" id="mypanel" data-display="overlay">
-
-	<a href='' data-role='button' data-icon="star" id='openprofile'>Profile</a>
-    <a href='' data-role='button' data-icon="star" id='feedback'>Feed Back</a>
-    <a href='' data-role='button' data-icon="star" id='about'>About</a>
-	<a href='' data-role='button' data-icon="star" id='close'>Close</a>
-	</div><!-- /panel -->
-
-	<div data-role="header" id="wellcomescrn">
-		<a href="#mypanel" class="ui-btn ui-shadow ui-corner-all ui-icon-gear ui-btn-icon-notext">Options</a>
-		<h1>Wellcome</h1>
-		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
-		<div data-role="navbar">
-			<ul>
-				<li><a href="#newOrder" data-icon="star" id='gotoNewOrder'>New Order</a></li>
-				<li><a href="#" data-icon="info">Order Status</a></li>
-				<li><a href="#" data-icon="clock">History</a></li>
-			</ul>
-		</div><!-- /navbar -->
-	</div>
-
-	<div data-role='content'>
-		<a align='center'><img align='center' src="start-button.jpg"/> </a>
-		<p align='center' > this application is an initial effort to provide on time service with intended quality. with this app you can easly place and schedule an order as per your conveniance. </a>  
-	</div>
-</div><!-- /page -->
-
-<!-- new order page -->
-<div data-role="page" id="newOrder">
-	<div data-role="header">
-		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
-		<h1>New Order</h1>
-		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
-	</div>
-	<div data-role='content'>	
-		<label for="pickuptime">Scheduled Pickup</label>
-		<input type="datetime-local" data-clear-btn="false" name="datetime-3" id="pickuptime" value=''>
-		<label  inline=true for="datetime-4">Datetime-local: data-clear-btn="true"</label>
-		<input inline=true type="datetime-local" data-clear-btn="true" name="datetime-4" id="datetime-4" value="">
-
-		<label for="tel-2">Tel: data-clear-btn="true"</label>
-		 <input name="tel-2" id="tel-2" type="tel" value="" data-clear-btn="true">
-
-		 <a href="#" data-icon="lock">Place Order</a>
-     </div>
-</div>
-
 <!-- Start of registration page -->
 <div data-role="page" id="registration">
 
@@ -236,6 +276,7 @@ $(document).ready(function(){
 	</div>
 </div><!-- /page -->
 
+<!-- Start of Profile Update page -->
 <div data-role="page" id="profile">
 	<div data-role="header">
 		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
@@ -269,6 +310,170 @@ $(document).ready(function(){
 
 	</div>
 </div><!-- /page -->
+
+
+<!-- Start of Wellcome page  -->
+<div data-role="page" id="start" >
+	<div data-role="panel" id="mypanel" data-display="overlay">
+
+	<a href='' data-role='button' data-icon="star" id='openprofile'>Profile</a>
+    <a href='' data-role='button' data-icon="star" id='feedback'>Feed Back</a>
+    <a href='' data-role='button' data-icon="star" id='about'>About</a>
+	<a href='' data-role='button' data-icon="star" id='close'>Close</a>
+	</div><!-- /panel -->
+
+	<div data-role="header" id="wellcomescrn">
+		<a href="#mypanel" class="ui-btn ui-shadow ui-corner-all ui-icon-gear ui-btn-icon-notext">Options</a>
+		<h1>Wellcome</h1>
+		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#" data-icon="star" id='gotoNewOrder'>New Order</a></li>
+				<li><a id='gotoOrderStatus' data-icon="info">Order Status</a></li>
+				<li><a href="#" data-icon="clock">History</a></li>
+			</ul>
+		</div><!-- /navbar -->
+	</div>
+
+	<div data-role='content'>
+		<a align='center'><img align='center' src="start-button.jpg"/> </a>
+		<p align='center' > this application is an initial effort to provide on time service with intended quality. with this app you can easly place and schedule an order as per your conveniance. </a>  
+	</div>
+</div><!-- /page -->
+
+<!-- Start of New Order page --> 
+<div data-role="page" id="newOrder">
+	<div data-role="header">
+		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
+		<h1>New Order</h1>
+		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#newOrder" class='ui-btn-active ui-state-persist' data-icon="star" id='gotoNewOrder'>New Order</a></li>
+				<li><a href="#" data-icon="info">Order Status</a></li>
+				<li><a href="#" data-icon="clock">History</a></li>
+			</ul>
+		</div><!-- /navbar -->
+	</div>
+	<div data-role='content'>	
+		<div data-role="fieldcontain">
+			<fieldset data-role="controlgroup">
+				<legend>Date of Birth:</legend>
+
+				<label for="select-choice-time">Time</label>
+			<select name="select-choice-time" id="select-choice-time">
+				<option>Month</option>
+				<option value="jan">7 AM</option>
+				<option value="jan">8 AM</option>
+				<option value="jan">9 AM</option>
+				<option value="jan">10 AM</option>
+				<option value="jan">11 AM</option>
+				<option value="jan">12 PM</option>
+				<option value="jan">1 PM</option>
+				<option value="jan">2 PM</option>
+				<option value="jan">3 PM</option>
+				<option value="jan">4 PM</option>
+				<option value="jan">5 PM</option>
+				<option value="jan">6 PM</option>
+				<option value="jan">7 PM</option>
+				<option value="jan">8 PM</option>
+				<option value="jan">9 PM</option>
+				<!-- etc. -->
+			</select>
+
+				
+			</fieldset>
+		</div>
+
+		 <a href="" id='placeorderbtn' data-role='button' data-icon="lock">Place Order</a>
+     </div>
+</div>
+
+<!-- Start of New Order page  Backup working. with Date and Time fields.--> 
+<div data-role="page" id="newOrder_working">
+	<div data-role="header">
+		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
+		<h1>New Order</h1>
+		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#newOrder" class='ui-btn-active ui-state-persist' data-icon="star" id='gotoNewOrder'>New Order</a></li>
+				<li><a href="#" data-icon="info">Order Status</a></li>
+				<li><a href="#" data-icon="clock">History</a></li>
+			</ul>
+		</div><!-- /navbar -->
+	</div>
+	<div data-role='content'>	
+		<label for="pickupdate">Pickup Date (DD-MM-YYYY)</label>
+		<input type="date" data-clear-btn="false" name="datetime-3" id="pickupdate" value=''>
+		
+		<label for="pickuptime">Pickup Time (HH:MM)</label>
+		<input type="time" data-clear-btn="false" name="datetime-3" id="pickuptime" value=''>
+		
+		<div id='profiledata' >
+			<p id='profiledatap' font-color='red'></p>
+			
+		</div>
+
+		 <a href="" id='placeorderbtn' data-role='button' data-icon="lock">Place Order</a>
+     </div>
+</div>
+
+<!-- Start of Order Confirmation page --> 
+<div data-role="page" id="confirmOrder">
+	<div data-role="header">
+		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
+		<h1>New Order</h1>
+		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
+	</div>
+	<div data-role='content'>	
+		<p id='orderdetails'> 
+			Hi, <b id='orderdetailsname'> App.userprofile.name </b> We have received your order to be pickedup on <b id='orderdetailsdate'>
+		newOrder.pickupdate</b> @ <b id='orderdetailstime'>newOrder.scheduledpickup </b>. from address:<b id='orderdetailsaddress'> App.userprofile.address1' '+
+		App.userprofile.address2  App.userprofile.address3.</b> your mobile number is: <b id='orderdetailsmobile'> App.userprofile.mobile </b>
+		</p>
+		<p > 
+			Please confirm details and confirm your order. you can update your contact detials form profile option.
+			Track your order from Order status page.
+		</p>
+
+		 <a id='confirmationPass' data-role='button' data-icon="lock">Cofirm Order</a>
+		 <a id='confirmationFail' data-role='button' data-icon='back'   > Cancel </a> 
+    </div>
+</div>
+
+    <!-- Start of Order Status page --> 
+<div data-role="page" id="OrderStatus">
+	<div data-role="header">
+		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
+		<h1>Order Status</h1>
+		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
+		<div data-role="navbar">
+			<ul>
+				<li><a href='#newOrder' id='gotoNewOrder'  data-icon="star" >New Order</a></li>
+				<li><a id='gotoOrderStatus' class='ui-btn-active ui-state-persist' data-icon="info">Order Status</a></li>
+				<li><a id='gotoOrderHistory'  data-icon="clock">History</a></li>
+			</ul>
+		</div><!-- /navbar -->
+	</div>
+	<div data-role='content'>	
+		<label for="orderpickupdate">Pickup Date</label>
+		<input type="date" data-clear-btn="false" name="datetime-3" id="orderpickupdate" value=''>
+		
+		<label for="orderpickuptime">Pickup Time</label>
+		<input type="time" data-clear-btn="false" name="datetime-3" id="orderpickuptime" value=''>
+		
+		<label for="orderstatus">Status</label>
+		<input type="text" disabled='true'  id="orderstatus" value=''>
+
+		<div id='profiledata' >
+			<p id='profiledatap' color='red'></p>
+		</div>
+
+		 <a href="" id='updateorderbtn' data-role='button' data-icon="lock">UpdateOrder</a>
+     </div>
+</div>
+
 
 </body>
 </html>
