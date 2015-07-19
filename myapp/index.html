@@ -26,7 +26,7 @@ UserProfile.prototype.isRegistered = function() {
 };
 
 /***********************************************************
-* thsi function loads App User Profile from local db.
+* this function loads App User Profile from local db.
 ************************************************************/
 UserProfile.prototype.loadUserProfile = function() {
 	
@@ -54,7 +54,7 @@ Order = function(name, mobile,pickupdate, pickuptime,dropdate, droptime) {
 
 Orders = function() {
 	this.Order = new Array();
-}
+};
 
 MyApp = function() {
 	this.userprofile = new UserProfile();
@@ -362,7 +362,7 @@ $(document).ready(function(){
 
 				<label for="select-choice-time">Time</label>
 			<select name="select-choice-time" id="select-choice-time">
-				<option>Month</option>
+				<option value="">Pickup Time</option>
 				<option value="jan">7 AM</option>
 				<option value="jan">8 AM</option>
 				<option value="jan">9 AM</option>
@@ -380,6 +380,18 @@ $(document).ready(function(){
 				<option value="jan">9 PM</option>
 				<!-- etc. -->
 			</select>
+            
+            <select name="select-choice-time" id="select-choice-day">
+                <option value="">Pickup Day</option>
+                <option value="0"> Sunday</option>
+                <option value="1"> Monday</option>
+                <option value="2"> Tuesday</option>
+                <option value="3"> Wednesday</option>
+                <option value="4"> Thursday</option>
+                <option value="5"> Friday</option>
+                <option value="6"> Saturday</option>
+                <!-- etc. -->
+            </select>
 
 				
 			</fieldset>
@@ -420,10 +432,10 @@ $(document).ready(function(){
 </div>
 
 <!-- Start of Order Confirmation page --> 
-<div data-role="page" id="confirmOrder">
+<div data-role="page" id="confirmOrder_working">
 	<div data-role="header">
 		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
-		<h1>New Order</h1>
+		<h1>Confirm Order</h1>
 		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
 	</div>
 	<div data-role='content'>	
@@ -432,7 +444,7 @@ $(document).ready(function(){
 		newOrder.pickupdate</b> @ <b id='orderdetailstime'>newOrder.scheduledpickup </b>. from address:<b id='orderdetailsaddress'> App.userprofile.address1' '+
 		App.userprofile.address2  App.userprofile.address3.</b> your mobile number is: <b id='orderdetailsmobile'> App.userprofile.mobile </b>
 		</p>
-		<p > 
+		<p style='fornt-size=10'> 
 			Please confirm details and confirm your order. you can update your contact detials form profile option.
 			Track your order from Order status page.
 		</p>
@@ -441,7 +453,38 @@ $(document).ready(function(){
 		 <a id='confirmationFail' data-role='button' data-icon='back'   > Cancel </a> 
     </div>
 </div>
+    
+<div data-role="page" id="confirmOrder">
+	<div data-role="header">
+		<a href="#start" class="ui-btn ui-shadow ui-corner-all ui-icon-home ui-btn-icon-notext">Home</a>
+		<h1>Confirm Order</h1>
+		<a href="" id='exitApp' class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext">Delete</a>
+	</div>
+	<div data-role='content'>	
+		
+        <div class="ui-corner-all custom-corners">
+          <div class="ui-bar ui-bar-a">
+            <h3>Order Detail</h3>
+          </div>
+          <div class="ui-body ui-body-a">
+            <p>Pickup Date and Time from - to</p>
+          </div>
+        </div>
 
+        <div class="ui-corner-all custom-corners">
+          <div class="ui-bar ui-bar-a">
+            <h3>Pickup Details</h3>
+          </div>
+          <div class="ui-body ui-body-a">
+            <p>Pickup From Address <strong id='pickupadd'>1 asdfksad </strong>and Contact Details <strong id='pickupmobile'> 123456789</strong> </p>
+          </div>
+        </div>
+        
+		 <a id='confirmationPass' data-role='button' data-icon="lock">Cofirm Order</a>
+		 <a id='confirmationFail' data-role='button' data-icon='back'   > Cancel </a> 
+    </div>
+</div>
+    
     <!-- Start of Order Status page --> 
 <div data-role="page" id="OrderStatus">
 	<div data-role="header">
